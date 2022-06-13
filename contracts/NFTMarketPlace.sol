@@ -49,9 +49,11 @@ contract NFTMarketPlace is ReentrancyGuard {
 
     // Mappings
     // NFT Contract Address -> NFT Token ID -> Listing
+    //solhint-disable-next-line var-name-mixedcase
     mapping(address => mapping(uint256 => Listing)) private s_listings;
 
     // Seller Address -> Amount Earned
+    //solhint-disable-next-line var-name-mixedcase
     mapping(address => uint256) private s_proceeds;
 
     ////////////////
@@ -133,6 +135,72 @@ contract NFTMarketPlace is ReentrancyGuard {
     {
         delete (s_listings[nftAddress][tokenId]);
         emit ItemCanceled(msg.sender, nftAddress, tokenId);
+    }
+
+    /*
+     * @notice Method for buying listing
+     * @notice The owner of an NFT could unapprove the marketplace,
+     * which would cause this function to fail
+     * Ideally you'd also have a `createOffer` functionality.
+     * @param nftAddress Address of NFT contract
+     * @param tokenId Token ID of NFT
+     */
+    function buyItem(address nftAddress, uint256 tokenId)
+        external
+        payable
+        isListed(nftAddress, tokenId)
+        nonReentrant
+    {
+        Listing memory listing = s_listings[nftAddress][tokenId];
+        if (msg.value < listing.price) {
+            revert NFTMarketPlace__PriceNotMet(
+                nftAddress,
+                tokenId,
+                listing.price
+            );
+        }
+        s_proceeds[listing.seller] += msg.value;
+        delete (s_listings[nftAddress][tokenId]);
+        IERC721(nftAddress).safeTransferFrom(
+            listing.seller,
+            msg.sender,
+            tokenId
+        );
+        emit ItemBought(msg.sender, nftAddress, tokenId, listing.price);
+    }
+
+    /*
+     * @notice Method for updating listing
+     * @param nftAddress Address of NFT contract
+     * @param tokenId Token ID of NFT
+     * @param newPrice Price in Wei of the item
+     */
+    function updateListing(
+        address nftAddress,
+        uint256 tokenId,
+        uint256 newPrice
+    )
+        external
+        isListed(nftAddress, tokenId)
+        nonReentrant
+        isOwner(nftAddress, tokenId, msg.sender)
+    {
+        s_listings[nftAddress][tokenId].price = newPrice;
+        emit ItemListed(msg.sender, nftAddress, tokenId, newPrice);
+    }
+
+    /*
+     * @notice Method for withdrawing proceeds from sales
+     */
+    function withdrawProceeds() external {
+        uint256 proceeds = s_proceeds[msg.sender];
+        if (proceeds <= 0) {
+            revert NFTMarketPlace__NoProceeds();
+        }
+        s_proceeds[msg.sender] = 0;
+        // solhint-disable-next-line avoid-low-level-calls
+        (bool success, ) = payable(msg.sender).call{value: proceeds}("");
+        require(success, "Transfer Failed");
     }
 
     ///////////////////////
