@@ -72,4 +72,13 @@ import { NftMarketPlace, BasicNft } from "../typechain";
           assert(listing.seller.toString() === (await deployer.getAddress()));
         });
       });
+
+      describe("cancelListing", function () {
+        it("reverts if there is no listing", async function () {
+          const error = `NotListed("${basicNft.address}", ${TOKEN_ID})`;
+          await expect(
+            nftMarketPlace.cancelListing(basicNft.address, TOKEN_ID)
+          ).to.be.revertedWith(error);
+        });
+      });
     });
