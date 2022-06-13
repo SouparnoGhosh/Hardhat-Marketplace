@@ -61,5 +61,15 @@ import { NftMarketPlace, BasicNft } from "../typechain";
             nftMarketPlace.listItem(basicNft.address, TOKEN_ID, PRICE)
           ).to.be.revertedWith("NotApprovedForMarketplace");
         });
+
+        it("Updates listing with seller and price", async function () {
+          await nftMarketPlace.listItem(basicNft.address, TOKEN_ID, PRICE);
+          const listing = await nftMarketPlace.getListing(
+            basicNft.address,
+            TOKEN_ID
+          );
+          assert(listing.price.toString() === PRICE.toString());
+          assert(listing.seller.toString() === (await deployer.getAddress()));
+        });
       });
     });
