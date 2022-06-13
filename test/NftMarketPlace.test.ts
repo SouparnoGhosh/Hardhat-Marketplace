@@ -116,5 +116,21 @@ import { NftMarketPlace, BasicNft } from "../typechain";
             nftMarketPlace.buyItem(basicNft.address, TOKEN_ID)
           ).to.be.revertedWith("PriceNotMet");
         });
+
+        it("transfers the nft to the buyer and updates internal proceeds record", async function () {
+          await nftMarketPlace.listItem(basicNft.address, TOKEN_ID, PRICE);
+          nftMarketPlace = nftMarketPlaceContract.connect(user);
+          expect(
+            await nftMarketPlace.buyItem(basicNft.address, TOKEN_ID, {
+              value: PRICE,
+            })
+          ).to.emit(nftMarketPlace, "ItemBought");
+          const newOwner = await basicNft.ownerOf(TOKEN_ID);
+          const deployerProceeds = await nftMarketPlace.getProceeds(
+            await deployer.getAddress()
+          );
+          assert(newOwner.toString() == (await user.getAddress()));
+          assert(deployerProceeds.toString() == PRICE.toString());
+        });
       });
     });
