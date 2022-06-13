@@ -38,5 +38,13 @@ import { NftMarketPlace, BasicNft } from "../typechain";
             await nftMarketPlace.listItem(basicNft.address, TOKEN_ID, PRICE)
           ).to.emit(nftMarketPlace, "ItemListed");
         });
+
+        it("exclusively items that haven't been listed", async function () {
+          await nftMarketPlace.listItem(basicNft.address, TOKEN_ID, PRICE);
+          const error = `AlreadyListed("${basicNft.address}", ${TOKEN_ID})`;
+          await expect(
+            nftMarketPlace.listItem(basicNft.address, TOKEN_ID, PRICE)
+          ).to.be.revertedWith(error);
+        });
       });
     });
