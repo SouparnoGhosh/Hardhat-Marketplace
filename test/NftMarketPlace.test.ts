@@ -145,5 +145,22 @@ import { NftMarketPlace, BasicNft } from "../typechain";
             nftMarketPlace.updateListing(basicNft.address, TOKEN_ID, PRICE)
           ).to.be.revertedWith("NotOwner");
         });
+
+        it("updates the price of the item", async function () {
+          const updatedPrice = ethers.utils.parseEther("0.2");
+          await nftMarketPlace.listItem(basicNft.address, TOKEN_ID, PRICE);
+          expect(
+            await nftMarketPlace.updateListing(
+              basicNft.address,
+              TOKEN_ID,
+              updatedPrice
+            )
+          ).to.emit(nftMarketPlace, "ItemListed");
+          const listing = await nftMarketPlace.getListing(
+            basicNft.address,
+            TOKEN_ID
+          );
+          assert(listing.price.toString() === updatedPrice.toString());
+        });
       });
     });
