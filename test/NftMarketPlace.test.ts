@@ -163,4 +163,12 @@ import { NftMarketPlace, BasicNft } from "../typechain";
           assert(listing.price.toString() === updatedPrice.toString());
         });
       });
+
+      describe("withdrawProceeds", function () {
+        it("doesn't allow 0 proceed withdrawls", async function () {
+          await expect(nftMarketPlace.withdrawProceeds()).to.be.revertedWith(
+            "NoProceeds"
+          );
+        });
+      });
     });
