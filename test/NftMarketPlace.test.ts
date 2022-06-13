@@ -48,11 +48,18 @@ import { NftMarketPlace, BasicNft } from "../typechain";
         });
 
         it("exclusively allows owners to list", async function () {
-          nftMarketplace = nftMarketplaceContract.connect(user);
+          nftMarketPlace = nftMarketPlaceContract.connect(user);
           await basicNft.approve(await user.getAddress(), TOKEN_ID);
           await expect(
-            nftMarketplace.listItem(basicNft.address, TOKEN_ID, PRICE)
+            nftMarketPlace.listItem(basicNft.address, TOKEN_ID, PRICE)
           ).to.be.revertedWith("NotOwner");
+        });
+
+        it("needs approvals to list item", async function () {
+          await basicNft.approve(ethers.constants.AddressZero, TOKEN_ID);
+          await expect(
+            nftMarketPlace.listItem(basicNft.address, TOKEN_ID, PRICE)
+          ).to.be.revertedWith("NotApprovedForMarketplace");
         });
       });
     });
