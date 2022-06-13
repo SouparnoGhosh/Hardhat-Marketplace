@@ -2,11 +2,10 @@
 /* eslint-disable node/no-missing-import */
 /* eslint-disable node/no-unpublished-import */
 /* eslint-disable node/no-extraneous-import */
-import { Provider } from "@ethersproject/abstract-provider";
 import { assert, expect } from "chai";
 import { Signer } from "ethers";
 import { network, deployments, ethers } from "hardhat";
-import { developmentChains, networkConfig } from "../helper-hardhat-config";
+import { developmentChains } from "../helper-hardhat-config";
 import { NftMarketPlace, BasicNft } from "../typechain";
 
 !developmentChains.includes(network.name)
@@ -168,6 +167,30 @@ import { NftMarketPlace, BasicNft } from "../typechain";
         it("doesn't allow 0 proceed withdrawls", async function () {
           await expect(nftMarketPlace.withdrawProceeds()).to.be.revertedWith(
             "NoProceeds"
+          );
+        });
+
+        it("withdraws proceeds", async function () {
+          await nftMarketPlace.listItem(basicNft.address, TOKEN_ID, PRICE);
+          nftMarketPlace = nftMarketPlaceContract.connect(user);
+          await nftMarketPlace.buyItem(basicNft.address, TOKEN_ID, {
+            value: PRICE,
+          });
+          nftMarketPlace = nftMarketPlaceContract.connect(deployer);
+
+          const deployerProceedsBefore = await nftMarketPlace.getProceeds(
+            await deployer.getAddress()
+          );
+          const deployerBalanceBefore = await deployer.getBalance();
+          const txResponse = await nftMarketPlace.withdrawProceeds();
+          const transactionReceipt = await txResponse.wait(1);
+          const { gasUsed, effectiveGasPrice } = transactionReceipt;
+          const gasCost = gasUsed.mul(effectiveGasPrice);
+          const deployerBalanceAfter = await deployer.getBalance();
+
+          assert(
+            deployerBalanceAfter.add(gasCost).toString() ===
+              deployerProceedsBefore.add(deployerBalanceBefore).toString()
           );
         });
       });
