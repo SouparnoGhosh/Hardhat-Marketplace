@@ -109,5 +109,12 @@ import { NftMarketPlace, BasicNft } from "../typechain";
             nftMarketPlace.buyItem(basicNft.address, TOKEN_ID)
           ).to.be.revertedWith("NotListed");
         });
+
+        it("reverts if the price isnt met", async function () {
+          await nftMarketPlace.listItem(basicNft.address, TOKEN_ID, PRICE);
+          await expect(
+            nftMarketPlace.buyItem(basicNft.address, TOKEN_ID)
+          ).to.be.revertedWith("PriceNotMet");
+        });
       });
     });
