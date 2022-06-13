@@ -80,5 +80,14 @@ import { NftMarketPlace, BasicNft } from "../typechain";
             nftMarketPlace.cancelListing(basicNft.address, TOKEN_ID)
           ).to.be.revertedWith(error);
         });
+
+        it("reverts if anyone but the owner tries to call", async function () {
+          await nftMarketPlace.listItem(basicNft.address, TOKEN_ID, PRICE);
+          nftMarketPlace = nftMarketPlaceContract.connect(user);
+          await basicNft.approve(await user.getAddress(), TOKEN_ID);
+          await expect(
+            nftMarketPlace.cancelListing(basicNft.address, TOKEN_ID)
+          ).to.be.revertedWith("NotOwner");
+        });
       });
     });
