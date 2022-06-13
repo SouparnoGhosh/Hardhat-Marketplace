@@ -19,4 +19,47 @@ error NFTMarketPlace__NotOwner();
 error NFTMarketPlace__NotApprovedForMarketplace();
 error NFTMarketPlace__PriceMustBeAboveZero();
 
-contract NFTMarketPlace is ReentrancyGuard {}
+contract NFTMarketPlace is ReentrancyGuard {
+    // Custom Types
+    struct Listing {
+        uint256 price;
+        address seller;
+    }
+
+    // Events
+    event ItemListed(
+        address indexed seller,
+        address indexed nftAddress,
+        uint256 indexed tokenId,
+        uint256 price
+    );
+
+    event ItemCanceled(
+        address indexed seller,
+        address indexed nftAddress,
+        uint256 indexed tokenId
+    );
+
+    event ItemBought(
+        address indexed buyer,
+        address indexed nftAddress,
+        uint256 indexed tokenId,
+        uint256 price
+    );
+
+    ///////////////////////
+    // Getter Functions //
+    /////////////////////
+
+    function getListing(address nftAddress, uint256 tokenId)
+        external
+        view
+        returns (Listing memory)
+    {
+        return s_listings[nftAddress][tokenId];
+    }
+
+    function getProceeds(address seller) external view returns (uint256) {
+        return s_proceeds[seller];
+    }
+}
