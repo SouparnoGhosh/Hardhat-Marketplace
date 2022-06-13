@@ -5,6 +5,7 @@ pragma solidity ^0.8.6;
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
+//solhint-disable var-name-mixedcase
 // Errors
 error NFTMarketPlace__PriceNotMet(
     address nftAddress,
@@ -49,11 +50,10 @@ contract NFTMarketPlace is ReentrancyGuard {
 
     // Mappings
     // NFT Contract Address -> NFT Token ID -> Listing
-    //solhint-disable-next-line var-name-mixedcase
+    //solhint-disable var-name-mixedcase
     mapping(address => mapping(uint256 => Listing)) private s_listings;
 
     // Seller Address -> Amount Earned
-    //solhint-disable-next-line var-name-mixedcase
     mapping(address => uint256) private s_proceeds;
 
     ////////////////
