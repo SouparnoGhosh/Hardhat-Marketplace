@@ -42,6 +42,6 @@
     "hardhat-deploy": "^0.11.5"
   },
   "scripts": {
-    "build": "hh clean && hh compile"
+    "build": "yarn hardhat clean && yarn hardhat compile"
   }
 }

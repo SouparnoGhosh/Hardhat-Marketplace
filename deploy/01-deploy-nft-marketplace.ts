@@ -20,7 +20,7 @@ const deployNftMarketplace: DeployFunction = async function (
 
   log("----------------------------------------------------");
   const args: any[] = [];
-  const nftMarketplace = await deploy("NftMarketplace", {
+  const nftMarketPlace = await deploy("NftMarketPlace", {
     from: deployer,
     args: args,
     log: true,
@@ -33,7 +33,7 @@ const deployNftMarketplace: DeployFunction = async function (
     process.env.ETHERSCAN_API_KEY
   ) {
     log("Verifying...");
-    await verify(nftMarketplace.address, args);
+    await verify(nftMarketPlace.address, args);
   }
   log("----------------------------------------------------");
 };
